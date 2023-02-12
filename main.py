@@ -24,17 +24,24 @@ def app(
         ticker_AAPL = db_handler.Ticker(path=db_path, filename=db_file)
 
         from market_indicators import moving_average
-        from charts import create_candlestick
         from strategies import basic_strategies
+        from orders import strategy_simulator
 
         ticker_AAPL = moving_average.simple_moving_average(ticker_AAPL, 15)
         ticker_AAPL.from_date = "2022-06-01"
 
-        basic_strategies.crossover(ticker_AAPL)
+        ma_strategy = basic_strategies.Strategy(basic_strategies.crossover)
+        portfolio = strategy_simulator.Portfolio(cash=1000)
 
-        fig = create_candlestick.create_candlestick_chart(ticker_AAPL)
-        fig = create_candlestick.create_line(fig, ticker_AAPL)
-        fig.show()
+        # simulation = strategy_simulator.MarketSimulation(portfolio, ma_strategy)
+
+        # simulation.run(verbose=True)
+
+        # basic_strategies.crossover(ticker_AAPL)
+
+        # fig = create_candlestick.create_candlestick_chart(ticker_AAPL)
+        # fig = create_candlestick.create_line(fig, ticker_AAPL)
+        # fig.show()
 
     else:
         raise Exception('No input data_handler provided')

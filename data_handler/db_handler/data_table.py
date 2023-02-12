@@ -1,6 +1,6 @@
-import datetime
-
 import pandas as pd
+
+from utils.parser import str_to_date
 
 
 class Ticker:
@@ -19,8 +19,8 @@ class Ticker:
             self.measure_frequency()
         self.standard_indexing()
 
-        self._from_date = self.str_to_date(from_date)
-        self._to_date = self.str_to_date(to_date)
+        self._from_date = str_to_date(from_date)
+        self._to_date = str_to_date(to_date)
 
     def standard_indexing(self, col_index=0):
         self._df.set_index(self._df.columns[col_index], inplace=True, drop=True)
@@ -63,7 +63,7 @@ class Ticker:
 
     @to_date.setter
     def to_date(self, v):
-        self._to_date = self.str_to_date(v)
+        self._to_date = str_to_date(v)
 
     @property
     def from_date(self):
@@ -71,7 +71,7 @@ class Ticker:
 
     @from_date.setter
     def from_date(self, v):
-        self._from_date = self.str_to_date(v)
+        self._from_date = str_to_date(v)
 
     def __repr__(self):
         return "Table()"
@@ -85,20 +85,13 @@ class Ticker:
     def __getitem__(self, item):
         return self._df[item]
 
-    @staticmethod
-    def str_to_date(date):
-        if date:
-            return datetime.datetime.strptime(date, '%Y-%m-%d')
-        else:
-            return None
-
     def get_period(self, from_date=None, to_date=None, use_ticker_period=True):
         b_f, b_t = None, None
         if use_ticker_period:
             b_f = self._from_date
             b_t = self._to_date
-        f = self.str_to_date(from_date) if from_date else b_f
-        t = self.str_to_date(to_date) if to_date else b_t
+        f = str_to_date(from_date) if from_date else b_f
+        t = str_to_date(to_date) if to_date else b_t
         df = self._df
         if f:
             df = df[df.index >= f]
