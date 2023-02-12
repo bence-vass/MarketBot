@@ -26,30 +26,27 @@ def app(
         from strategies import basic_strategies
         from orders import strategy_simulator
         from charts import create_candlestick
+        from market_indicators.moving_average import simple_moving_average
 
-        # ticker_AAPL = moving_average.simple_moving_average(ticker_AAPL, 15)
-        ticker_AAPL.from_date = "2020-01-01"
-
-        ma_strategy = basic_strategies.Strategy(basic_strategies.crossover)
+        dataset = ticker_AAPL
         portfolio = strategy_simulator.Portfolio(cash=1000)
-
-        data = [
-            ticker_AAPL,
-        ]
-
-        simulation = strategy_simulator.MarketSimulation(
-            data, ma_strategy, portfolio,
-            start_date='2020-01-10'
-        )
-        simulation.run(verbose=True)
-
-        print(portfolio)
+        strategy = basic_strategies.Crossover(dataset, portfolio)
+        from_date = '2020-06-01'
+        # to_date = '2023-01-01'
+        to_date = None
+        strategy.evaluate_hist(from_date=from_date, to_date=to_date, flip=True)
 
         # basic_strategies.crossover(ticker_AAPL)
+        ticker_AAPL.from_date = from_date
+        ticker_AAPL.to_date = to_date
+        ticker_AAPL = simple_moving_average(ticker_AAPL, 50)
 
         fig = create_candlestick.create_candlestick_chart(ticker_AAPL)
-        # fig = create_candlestick.create_line(fig, ticker_AAPL)
+        fig = create_candlestick.trend_line(fig, ticker_AAPL)
+        fig = create_candlestick.buy_sell_points(fig, ticker_AAPL)
         fig.show()
+
+        print(portfolio)
 
     else:
         raise Exception('No input data_handler provided')

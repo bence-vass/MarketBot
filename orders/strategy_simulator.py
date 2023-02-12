@@ -76,9 +76,11 @@ class Portfolio:
         if type(date) == str:
             date = str_to_date(date)
         price_t = ticker.df.loc[date]['close']
+
         if verbose:
             print("BUY-" + ticker.ticker + " for " + str(price_t) + " USD at " + str(date))
             print("Total: " + str(price_t * num_shares) + " USD\n")
+
         transaction_vol = price_t * num_shares
         if self.check_coverage(transaction_vol):
             self._cash = self._cash - transaction_vol
@@ -143,33 +145,6 @@ class MarketSimulation:
 
         ticker = self._database[0]
         df = ticker.df
-        # preprocessor
-        from market_indicators import moving_average
-        df = moving_average.simple_moving_average(df, 20)
-        df['over'] = df.apply(lambda r: r['close'] > r['SMA'], axis=1)
-        df['turn'] = df['over'].diff()
 
-        # evaluation
-
-        # TODO add these params to Strategy class
-        long_trading = True
-        short_trading = False
-        buy = self._portfolio.buy_stock
-        sell = self._portfolio.sell_stock
-
-        period = ticker.get_period(from_date=self._start_date, to_date='2023-01-01')
-        for index, row in period.iterrows():
-            if row['turn']:
-                can_buy = int(self._portfolio.cash / row['close'])
-                can_sell = 0 if ticker not in self._portfolio.stocks else self._portfolio.stocks[ticker]
-
-                if row['over']:
-                    if long_trading:  # buy long
-                        buy(ticker, index, can_buy, verbose=True)
-                    if short_trading:  # sell short
-                        sell(ticker, index, can_sell, verbose=True)
-                else:
-                    if long_trading:  # sell long
-                        sell(ticker, index, can_sell, verbose=True)
-                    if short_trading:  # buy short
-                        buy(ticker, index, can_buy, verbose=True)
+        self._strategy.preprocessor()
+        pass
